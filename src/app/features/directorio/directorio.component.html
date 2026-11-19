@@ -1,0 +1,55 @@
+<header class="page-heading">
+  <span class="eyebrow">UN PATRIMONIO, MUCHOS DESTINOS</span>
+  <h1>Directorio de museos</h1>
+  <div class="gold-rule"></div>
+  <p>Encontrá museos en toda la provincia de Córdoba.</p>
+</header>
+<form class="filter-bar directory-filter" (ngSubmit)="search()">
+  <label class="search-input"
+    ><span class="sr-only">Buscar por nombre</span
+    ><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" />
+      <path d="m15 15 6 6" /></svg
+    ><input
+      name="q"
+      type="search"
+      placeholder="Buscar por nombre"
+      [(ngModel)]="draftQ" /></label
+  ><label class="sr-only" for="city">Localidad</label
+  ><select id="city" name="city" [(ngModel)]="draftCity">
+    <option value="">Todas las localidades</option>
+    @for (c of cities; track c) {
+      <option [value]="c">{{ c }}</option>
+    }</select
+  ><label class="sr-only" for="type">Tipo de museo</label
+  ><select id="type" name="type" [(ngModel)]="draftType">
+    <option value="">Todos los tipos</option>
+    @for (t of types; track t) {
+      <option [value]="t">{{ t }}</option>
+    }</select
+  ><button class="button">Buscar <span aria-hidden="true">→</span></button>
+</form>
+<div class="results" role="status">
+  <span
+    >{{ filtered().length }}
+    {{
+      filtered().length === 1 ? "museo encontrado" : "museos encontrados"
+    }}</span
+  >
+  @if (q() || city() || type()) {
+    <button class="clear" (click)="clear()">Limpiar filtros ×</button>
+  }
+</div>
+<p class="demo-caption">Una selección ilustrativa para explorar la demo.</p>
+<div class="grid">
+  @for (m of filtered(); track m.slug) {
+    <app-card [museum]="m" [query]="query()" />
+  }
+</div>
+@if (filtered().length === 0) {
+  <div class="empty">
+    <h2>No encontramos museos con estos filtros</h2>
+    <p>Probá otra localidad o ampliá tu búsqueda.</p>
+    <button class="button" (click)="clear()">Ver todos los museos</button>
+  </div>
+}

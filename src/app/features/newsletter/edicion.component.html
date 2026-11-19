@@ -1,0 +1,37 @@
+<a class="back-link" routerLink="/newsletter">← Volver al Newsletter</a>
+<article class="full-edition">
+  <header>
+    <span class="eyebrow">{{ edition.label }}</span>
+    <h1>{{ edition.title }}</h1>
+    <div class="gold-rule"></div>
+    <p class="intro">{{ edition.intro }}</p>
+  </header>
+  <section class="editorial-letter">
+    <span class="eyebrow">LA CARTA DE ESTA EDICIÓN</span>
+    <h2>Volver a mirar, cerca de casa</h2>
+    <p>{{ edition.editorial }}</p>
+    <span class="signature">El equipo de Museos de Córdoba</span>
+  </section>
+  <div class="section-heading">
+    <h2>Para seguir descubriendo</h2>
+    <span></span>
+  </div>
+  <div class="grid two">
+    @for (n of notes; track n.slug) {
+      <div>
+        <app-card [note]="n" />
+        <p>{{ n.intro }}</p>
+      </div>
+    }
+  </div>
+  <div class="edition-closing">
+    <h2>Tu próxima visita empieza con una historia.</h2>
+    <a class="button" routerLink="/directorio"
+      >Explorar el directorio <span aria-hidden="true">→</span></a
+    >
+  </div>
+  <p class="demo-label">
+    Edición y contenidos de ejemplo. Esta demo no envía correos ni guarda
+    suscriptores.
+  </p>
+</article>

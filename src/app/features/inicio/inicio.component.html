@@ -1,0 +1,78 @@
+<section
+  class="entrance-hero"
+  [class.play-entrance]="animateEntry"
+  aria-labelledby="welcome-title"
+>
+  <div class="hero-visual">
+    <img
+      class="gallery-photo"
+      src="images/palacio.jpg"
+      alt="Galería de arcos, esculturas y luz natural de un museo"
+      width="669"
+      height="380"
+      fetchpriority="high"
+    />
+    <div class="hero-shade"></div>
+  </div>
+  <div class="arch-outline" aria-hidden="true"></div>
+  <div class="hero-content container">
+    <h1 class="hero-title" id="welcome-title">
+      La cultura de Córdoba, de museo en museo
+    </h1>
+    <p class="hero-intro">Noticias, muestras y lugares para descubrir.</p>
+    <button class="button explore-button" type="button" (click)="explore()">
+      Explorá museos <span aria-hidden="true">→</span>
+    </button>
+  </div>
+</section>
+<div class="home-content container">
+  <section
+    class="search-band"
+    id="museum-search"
+    tabindex="-1"
+    aria-labelledby="encontra"
+  >
+    <h2 id="encontra">Encontrá un museo <span>en Córdoba</span></h2>
+    <form (ngSubmit)="search()">
+      <label class="sr-only" for="home-city">Localidad</label
+      ><select id="home-city" name="city" [(ngModel)]="city">
+        <option value="">Todas las localidades</option>
+        @for (c of cities; track c) {
+          <option [value]="c">{{ c }}</option>
+        }</select
+      ><label class="sr-only" for="home-type">Tipo de museo</label
+      ><select id="home-type" name="type" [(ngModel)]="type">
+        <option value="">Todos los tipos</option>
+        @for (t of types; track t) {
+          <option [value]="t">{{ t }}</option>
+        }</select
+      ><button class="button">
+        Buscar museos <span aria-hidden="true">→</span>
+      </button>
+    </form>
+  </section>
+  <div class="ad" aria-label="Espacio publicitario de ejemplo">
+    Espacio publicitario <small>DE EJEMPLO</small>
+  </div>
+  <section aria-labelledby="ultimas">
+    <div class="section-heading">
+      <h2 id="ultimas">Últimas noticias</h2>
+      <span></span
+      ><a routerLink="/noticias" class="text-link"
+        >Ver todas <span aria-hidden="true">→</span></a
+      >
+    </div>
+    <div class="grid">
+      @for (n of latestNews; track n.slug) {
+        <app-card [note]="n" />
+      }
+    </div>
+  </section>
+  <section class="signup-strip">
+    <div>
+      <span class="eyebrow">CULTURA PARA SEGUIR DESCUBRIENDO</span>
+      <h2>Recibí las novedades</h2>
+    </div>
+    <app-subscribe [compact]="true" />
+  </section>
+</div>

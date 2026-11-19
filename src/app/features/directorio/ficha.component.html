@@ -1,0 +1,59 @@
+<a class="back-link" routerLink="/directorio" queryParamsHandling="preserve"
+  >← Volver al directorio</a
+>
+@if (museum(); as m) {
+  <article class="museum-detail">
+    <header class="page-heading">
+      <div class="meta">
+        <span>{{ m.city }}</span
+        ><span>{{ m.type }}</span>
+      </div>
+      <h1>{{ m.name }}</h1>
+      <div class="gold-rule"></div>
+      <p>{{ m.description }}</p>
+    </header>
+    <img
+      class="article-photo"
+      [src]="'images/' + m.image + '.jpg'"
+      [alt]="m.name"
+    />
+    <div class="museum-info">
+      <section>
+        <span class="eyebrow">PLANIFICÁ TU RECORRIDO</span>
+        <h2>Información para tu visita</h2>
+        <p class="demo-label">
+          Ficha de ejemplo: nombre, ubicación, horarios y contacto ilustrativos.
+          No usar para planificar una visita real.
+        </p>
+        <dl>
+          <dt>Dirección</dt>
+          <dd>{{ m.address }}, {{ m.city }}</dd>
+          <dt>Horarios</dt>
+          <dd>{{ m.hours }}</dd>
+          <dt>Contacto</dt>
+          <dd>{{ m.contact }}</dd>
+        </dl>
+      </section>
+      <aside>
+        <span class="eyebrow">ANTES DE IR</span>
+        <h2>Para orientarte</h2>
+        <p>{{ m.orientation }}</p>
+        <p>
+          Confirmá siempre horarios, entradas y accesibilidad con la
+          institución.
+        </p>
+        <a
+          class="text-link"
+          routerLink="/directorio"
+          queryParamsHandling="preserve"
+          >Explorar otros museos <span aria-hidden="true">→</span></a
+        >
+      </aside>
+    </div>
+  </article>
+} @else {
+  <div class="empty">
+    <h1>Museo no encontrado</h1>
+    <p>Volvé al directorio para explorar las fichas disponibles.</p>
+  </div>
+}

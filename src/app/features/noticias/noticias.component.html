@@ -1,0 +1,58 @@
+<header class="page-heading">
+  <span class="eyebrow">LA CULTURA SE CUENTA</span>
+  <h1>Noticias</h1>
+  <div class="gold-rule"></div>
+</header>
+<div class="filter-bar news-filter">
+  <label class="search-input"
+    ><span class="sr-only">Buscar una noticia</span
+    ><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6.5" />
+      <path d="m15 15 6 6" /></svg
+    ><input
+      type="search"
+      placeholder="Buscar una noticia"
+      [ngModel]="q()"
+      (ngModelChange)="update($event, category())"
+  /></label>
+  <div class="categories" aria-label="Filtrar por categoría">
+    @for (c of categories; track c) {
+      <button
+        type="button"
+        [class.selected]="category() === c"
+        [attr.aria-pressed]="category() === c"
+        (click)="update(q(), c)"
+      >
+        {{ c }}
+      </button>
+    }
+  </div>
+</div>
+<p class="results" role="status">
+  {{ filtered().length }}
+  {{ filtered().length === 1 ? "noticia encontrada" : "noticias encontradas" }}
+  @if (q() || category() !== "Todas") {
+    <button class="clear" (click)="clear()">Limpiar filtros ×</button>
+  }
+</p>
+<div class="grid">
+  @for (n of filtered().slice(0, 3); track n.slug) {
+    <app-card [note]="n" [query]="query()" />
+  }
+</div>
+@if (filtered().length > 3) {
+  <div class="ad">Espacio publicitario <small>DE EJEMPLO</small></div>
+  <div class="grid">
+    @for (n of filtered().slice(3); track n.slug) {
+      <app-card [note]="n" [query]="query()" />
+    }
+  </div>
+}
+@if (filtered().length === 0) {
+  <div class="empty">
+    <span aria-hidden="true">⌕</span>
+    <h2>No encontramos esa noticia</h2>
+    <p>Probá con otro título o explorá todas las categorías.</p>
+    <button class="button" (click)="clear()">Ver todas las noticias</button>
+  </div>
+}

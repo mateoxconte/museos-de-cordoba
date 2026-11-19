@@ -1,0 +1,43 @@
+<header class="page-heading">
+  <span class="eyebrow">SEGUIMOS EN CONTACTO</span>
+  <h1>Newsletter</h1>
+  <div class="gold-rule"></div>
+</header>
+<section class="newsletter-hero">
+  <div class="newsletter-copy">
+    <span class="eyebrow">UNA INVITACIÓN A DESCUBRIR</span>
+    <h2>Los museos de Córdoba, en tu correo</h2>
+    <div class="gold-rule"></div>
+    <p>Recibí un resumen de nuestras noticias, muestras y actividades.</p>
+    <app-subscribe />
+  </div>
+  <img
+    src="images/palacio.jpg"
+    alt="Luz natural en las galerías de un museo"
+  />
+</section>
+<section class="edition-section">
+  <div class="section-heading">
+    <h2>Edición de ejemplo</h2>
+    <span></span>
+  </div>
+  <p class="edition-intro">
+    Una pequeña muestra de lo que podrías encontrar en tu correo.
+  </p>
+  <div class="edition-preview">
+    <div class="mini-brand">
+      <img src="images/escudo-argentino.png" alt="" width="30" height="46" />
+      <h3>Museos de Córdoba</h3>
+      <div class="gold-rule"></div>
+    </div>
+    <h3 class="edition-banner">Novedades de los museos</h3>
+    <div class="grid two">
+      @for (n of news; track n.slug) {
+        <app-card [note]="n" />
+      }
+    </div>
+  </div>
+  <a class="text-link edition-link" routerLink="/newsletter/edicion-de-ejemplo"
+    >Leer edición de ejemplo <span aria-hidden="true">→</span></a
+  >
+</section>

@@ -1,0 +1,33 @@
+<a class="back-link" routerLink="/noticias" queryParamsHandling="preserve"
+  >← Volver a noticias</a
+>
+@if (note(); as n) {
+  <article class="article">
+    <div class="meta">
+      <span>{{ n.category }}</span
+      ><span>{{ n.date }}</span>
+    </div>
+    <h1>{{ n.title }}</h1>
+    <div class="gold-rule"></div>
+    <p class="intro">{{ n.intro }}</p>
+    <img
+      class="article-photo"
+      [src]="'images/' + n.image + '.jpg'"
+      [alt]="n.title"
+    />
+    <div class="article-body">
+      <p class="demo-label">Contenido de ejemplo para la demo</p>
+      @for (p of n.body; track $index) {
+        <p>{{ p }}</p>
+      }
+      <a class="text-link" routerLink="/noticias" queryParamsHandling="preserve"
+        >Seguir leyendo noticias <span aria-hidden="true">→</span></a
+      >
+    </div>
+  </article>
+} @else {
+  <div class="empty">
+    <h1>Nota no encontrada</h1>
+    <p>Volvé al listado para descubrir las noticias de ejemplo.</p>
+  </div>
+}

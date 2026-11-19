@@ -1,0 +1,555 @@
+@if (!editing) {
+  <header class="admin-heading compact-heading">
+    <div>
+      <span class="eyebrow">GESTIÓN DE CONTENIDOS</span>
+      <h1>{{ heading }}</h1>
+    </div>
+    <a class="button" [routerLink]="['/admin', section, 'nueva']"
+      >{{ createLabel }} <span aria-hidden="true">＋</span></a
+    >
+  </header>
+  @if (section === "noticias") {
+    <p class="admin-hint">
+      Hasta 3 destacadas en Inicio. Los borradores nuevos no aparecen en el
+      portal.
+    </p>
+    <div class="admin-list">
+      @for (n of store.notes(); track n.id) {
+        <article class="admin-row">
+          <img
+            class="row-thumbnail"
+            [src]="'images/' + n.draft.image + '.jpg'"
+            alt=""
+          />
+          <div>
+            <span class="eyebrow">{{ n.draft.category }}</span>
+            <h3>{{ n.draft.title || "Noticia sin título" }}</h3>
+            <small>{{
+              n.updatedAt
+                ? (n.updatedAt | date: "dd/MM/yyyy HH:mm")
+                : "Contenido de ejemplo"
+            }}</small>
+          </div>
+          <span class="status-badge" [class.draft]="store.isDraft(n)">{{
+            store.isDraft(n) ? "Borrador" : "Publicada en la demo"
+          }}</span>
+          @if (n.published) {
+            <label class="featured-control"
+              ><input
+                type="checkbox"
+                [checked]="store.featuredIds().includes(n.published.slug)"
+                (change)="
+                  toggleFeatured(
+                    n.published.slug,
+                    $any($event.target).checked,
+                    $event
+                  )
+                "
+              />Destacar en Inicio</label
+            >
+          }
+          <a
+            class="text-link"
+            [routerLink]="['/admin/noticias', n.id]"
+            [attr.aria-label]="
+              'Editar noticia: ' + (n.draft.title || 'Sin título')
+            "
+            >Editar →</a
+          >
+        </article>
+      }
+    </div>
+  }
+  @if (section === "newsletter") {
+    @if (store.editions().length) {
+      <div class="admin-list">
+        @for (e of store.editions(); track e.id) {
+          <article class="admin-row">
+            <div>
+              <h3>{{ e.subject || "Edición sin asunto" }}</h3>
+              <small>{{ e.updatedAt | date: "dd/MM/yyyy HH:mm" }}</small>
+            </div>
+            <span class="status-badge" [class.draft]="e.status === 'draft'">{{
+              e.status === "draft" ? "Borrador" : "Envío simulado"
+            }}</span
+            ><a class="text-link" [routerLink]="['/admin/newsletter', e.id]"
+              >{{ e.status === "draft" ? "Continuar borrador" : "Editar" }} →</a
+            >
+          </article>
+        }
+      </div>
+    } @else {
+      <div class="empty">
+        <h2>Tu primera edición está por empezar</h2>
+        <p>
+          Combiná noticias publicadas y textos escritos solo para tus lectores.
+        </p>
+        <a class="button" routerLink="/admin/newsletter/nueva"
+          >Crear primera edición</a
+        >
+      </div>
+    }
+  }
+  @if (section === "directorio") {
+    <div class="admin-list">
+      @for (m of store.museumRecords(); track m.data.slug) {
+        <article class="admin-row">
+          <img
+            class="row-thumbnail"
+            [src]="'images/' + m.data.image + '.jpg'"
+            alt=""
+          />
+          <div>
+            <span class="eyebrow">{{ m.data.city }} · {{ m.data.type }}</span>
+            <h3>{{ m.data.name }}</h3>
+            <small>{{ m.data.hours }}</small>
+          </div>
+          <a
+            class="text-link"
+            [routerLink]="['/admin/directorio', m.data.slug]"
+            [attr.aria-label]="'Editar museo: ' + m.data.name"
+            >Editar →</a
+          >
+        </article>
+      }
+    </div>
+  }
+} @else if (notFound) {
+  <div class="empty">
+    <h1>Contenido no encontrado</h1>
+    <a class="button" [routerLink]="['/admin', section]">Volver al listado</a>
+  </div>
+} @else {
+  <a class="back-link" [routerLink]="['/admin', section]"
+    >← Volver a {{ heading }}</a
+  >
+  <header class="admin-heading compact-heading">
+    <h1>
+      {{
+        section === "noticias"
+          ? "Editor de noticia"
+          : section === "newsletter"
+            ? "Editor de newsletter"
+            : "Ficha de museo"
+      }}
+    </h1>
+    <span class="status-badge draft">{{
+      dirty ? "Cambios sin guardar" : "Edición local"
+    }}</span>
+  </header>
+  @if (errors().length) {
+    <div class="editor-errors" id="editor-errors" tabindex="-1" role="alert">
+      <strong>Revisá estos datos</strong>
+      <ul>
+        @for (error of errors(); track error) {
+          <li>{{ error }}</li>
+        }
+      </ul>
+    </div>
+  }
+  @if (section === "noticias") {
+    <form
+      class="editor-form"
+      (ngSubmit)="saveNote(true)"
+      (input)="changed()"
+      novalidate
+    >
+      <div class="editor-fields">
+        <label
+          >Título <span aria-hidden="true">*</span
+          ><input name="title" [(ngModel)]="note.draft.title" required
+        /></label>
+        <div class="field-grid">
+          <label
+            >Categoría<select name="category" [(ngModel)]="note.draft.category">
+              @for (c of categories; track c) {
+                <option>{{ c }}</option>
+              }
+            </select></label
+          ><label
+            >Imagen de portada<select
+              name="image"
+              [(ngModel)]="note.draft.image"
+            >
+              @for (i of images; track i.id) {
+                <option [value]="i.id">{{ i.label }}</option>
+              }
+            </select></label
+          >
+        </div>
+        <label
+          >Resumen <span aria-hidden="true">*</span
+          ><textarea
+            name="intro"
+            [(ngModel)]="note.draft.intro"
+            rows="3"
+            required
+          ></textarea></label
+        ><label
+          >Cuerpo <span aria-hidden="true">*</span
+          ><textarea
+            name="body"
+            [(ngModel)]="body"
+            rows="12"
+            required
+          ></textarea
+          ><small>Separá los párrafos con una línea en blanco.</small></label
+        >
+      </div>
+      <aside class="editor-aside">
+        <img
+          [src]="'images/' + note.draft.image + '.jpg'"
+          alt="Portada seleccionada"
+        />
+        <p>
+          La vista previa no publica la nota. Guardar borrador conserva la
+          versión pública anterior, si existe.
+        </p>
+        @if (note.published) {
+          <a class="text-link" [routerLink]="['/noticias', note.published.slug]"
+            >Ver versión pública →</a
+          ><label class="featured-control"
+            ><input
+              type="checkbox"
+              [checked]="store.featuredIds().includes(note.published.slug)"
+              (change)="
+                toggleFeatured(
+                  note.published.slug,
+                  $any($event.target).checked,
+                  $event
+                )
+              "
+            />Destacar en Inicio</label
+          >
+        }
+      </aside>
+      <div class="editor-toolbar">
+        <button class="button secondary" type="button" (click)="saveNote()">
+          Guardar borrador</button
+        ><button class="button secondary" type="button" (click)="showPreview()">
+          Vista previa</button
+        ><button class="button" type="submit">Publicar en la demo →</button>
+      </div>
+    </form>
+  }
+  @if (section === "newsletter") {
+    <form
+      class="newsletter-editor"
+      (ngSubmit)="saveEdition(true)"
+      (input)="changed()"
+      novalidate
+    >
+      <div class="editor-fields">
+        <label
+          >Asunto <span aria-hidden="true">*</span
+          ><input
+            name="subject"
+            [(ngModel)]="edition.subject"
+            required /></label
+        ><label
+          >Título de la edición<input
+            name="title"
+            [(ngModel)]="edition.title" /></label
+        ><label
+          >Introducción <span class="optional">(opcional)</span
+          ><textarea
+            name="intro"
+            [(ngModel)]="edition.intro"
+            rows="3"
+          ></textarea>
+        </label>
+      </div>
+      <div class="section-heading">
+        <h2>Contenido de la edición</h2>
+        <span></span>
+      </div>
+      <p class="admin-hint">
+        Lo exclusivo queda en este boletín y no se publica en Noticias.
+      </p>
+      <div class="block-add">
+        <label
+          >Noticia publicada<select name="newsChoice" [(ngModel)]="newsChoice">
+            @for (n of store.published(); track n.slug) {
+              <option [value]="n.slug">{{ n.title }}</option>
+            }
+          </select></label
+        ><button
+          class="button secondary"
+          type="button"
+          (click)="addNews()"
+          [disabled]="!newsChoice"
+        >
+          Agregar noticia publicada</button
+        ><button
+          class="button secondary"
+          type="button"
+          (click)="addExclusive()"
+        >
+          Agregar contenido exclusivo
+        </button>
+      </div>
+      <div class="edition-blocks">
+        @for (block of edition.blocks; track block.id; let index = $index) {
+          <section
+            class="edition-block"
+            tabindex="-1"
+            [id]="'block-' + block.id"
+          >
+            <div class="block-topline">
+              <span class="eyebrow"
+                >{{ index + 1 }} ·
+                {{
+                  block.kind === "news"
+                    ? "NOTICIA DEL PORTAL"
+                    : "CONTENIDO EXCLUSIVO"
+                }}</span
+              >
+              <div class="block-controls">
+                <button
+                  type="button"
+                  [disabled]="index === 0"
+                  (click)="move(index, -1)"
+                  [attr.aria-label]="'Subir bloque ' + (index + 1)"
+                >
+                  ↑</button
+                ><button
+                  type="button"
+                  [disabled]="index === edition.blocks.length - 1"
+                  (click)="move(index, 1)"
+                  [attr.aria-label]="'Bajar bloque ' + (index + 1)"
+                >
+                  ↓</button
+                ><button
+                  type="button"
+                  (click)="remove(index)"
+                  [attr.aria-label]="'Quitar bloque ' + (index + 1)"
+                >
+                  Quitar
+                </button>
+              </div>
+            </div>
+            @if (block.kind === "news") {
+              <h3>
+                {{
+                  published(block.newsSlug)?.title || "Noticia no disponible"
+                }}
+              </h3>
+              <p>{{ published(block.newsSlug)?.intro }}</p>
+            } @else {
+              <label
+                >Título del bloque {{ index + 1 }}
+                <span class="optional">(opcional)</span
+                ><input
+                  [name]="'block-title-' + block.id"
+                  [(ngModel)]="block.title" /></label
+              ><label
+                >Texto exclusivo {{ index + 1
+                }}<textarea
+                  [name]="'block-text-' + block.id"
+                  [(ngModel)]="block.text"
+                  rows="5"
+                ></textarea>
+              </label>
+            }
+          </section>
+        } @empty {
+          <div class="empty block-empty">
+            <p>Agregá una noticia, un texto exclusivo o ambos para empezar.</p>
+          </div>
+        }
+      </div>
+      <div class="editor-toolbar">
+        <button class="button secondary" type="button" (click)="saveEdition()">
+          Guardar borrador</button
+        ><button class="button secondary" type="button" (click)="showPreview()">
+          Vista previa</button
+        ><button class="button" type="submit">Simular envío →</button>
+      </div>
+    </form>
+  }
+  @if (section === "directorio") {
+    <form
+      class="editor-form"
+      (ngSubmit)="saveMuseum()"
+      (input)="changed()"
+      novalidate
+    >
+      <div class="editor-fields">
+        <label
+          >Nombre del museo<input
+            name="name"
+            [(ngModel)]="museum.data.name"
+            required
+        /></label>
+        <div class="field-grid">
+          <label
+            >Localidad<input
+              name="city"
+              [(ngModel)]="museum.data.city"
+              list="museum-cities"
+              required /><datalist id="museum-cities">
+              @for (c of store.cities(); track c) {
+                <option [value]="c"></option>
+              }</datalist></label
+          ><label
+            >Tipo de museo<input
+              name="type"
+              [(ngModel)]="museum.data.type"
+              list="museum-types"
+              required /><datalist id="museum-types">
+              @for (t of store.types(); track t) {
+                <option [value]="t"></option>
+              }</datalist
+          ></label>
+        </div>
+        <label
+          >Dirección<input
+            name="address"
+            [(ngModel)]="museum.data.address"
+            required /></label
+        ><label
+          >Horarios<input
+            name="hours"
+            [(ngModel)]="museum.data.hours"
+            required /></label
+        ><label
+          >Descripción<textarea
+            name="description"
+            [(ngModel)]="museum.data.description"
+            rows="5"
+            required
+          ></textarea></label
+        ><label
+          >Contacto<input
+            name="contact"
+            [(ngModel)]="museum.data.contact"
+            required /></label
+        ><label
+          >Orientación y accesibilidad<textarea
+            name="orientation"
+            [(ngModel)]="museum.data.orientation"
+            rows="3"
+          ></textarea></label
+        ><label
+          >Imagen<select name="image" [(ngModel)]="museum.data.image">
+            @for (i of images; track i.id) {
+              <option [value]="i.id">{{ i.label }}</option>
+            }
+          </select></label
+        >
+      </div>
+      <aside class="editor-aside">
+        <img
+          [src]="'images/' + museum.data.image + '.jpg'"
+          alt="Imagen seleccionada del museo"
+        />
+        <p>
+          Los datos guardados se reflejan en el directorio público de esta demo.
+        </p>
+        @if (museum.updatedAt) {
+          <a class="text-link" [routerLink]="['/directorio', museum.data.slug]"
+            >Ver ficha pública →</a
+          >
+        }
+      </aside>
+      <div class="editor-toolbar">
+        <button class="button" type="submit">Guardar ficha →</button>
+      </div>
+    </form>
+  }
+  @if (preview()) {
+    <section
+      id="editor-preview"
+      class="editor-preview"
+      tabindex="-1"
+      aria-label="Vista previa"
+    >
+      <div class="preview-topline">
+        <span class="demo-badge">Vista previa · Sin publicar ni enviar</span
+        ><button class="clear" type="button" (click)="preview.set(false)">
+          Cerrar vista previa
+        </button>
+      </div>
+      @if (section === "noticias") {
+        <article class="article">
+          <div class="meta">
+            <span>{{ note.draft.category }}</span
+            ><span>Contenido de ejemplo</span>
+          </div>
+          <h1>{{ note.draft.title || "Título de la noticia" }}</h1>
+          <div class="gold-rule"></div>
+          <p class="intro">{{ note.draft.intro }}</p>
+          <img
+            class="article-photo"
+            [src]="'images/' + note.draft.image + '.jpg'"
+            alt="Portada de la noticia"
+          />
+          <div class="article-body">
+            @for (p of note.draft.body; track $index) {
+              <p>{{ p }}</p>
+            }
+          </div>
+        </article>
+      } @else {
+        <div class="email-envelope">
+          <p><strong>Asunto:</strong> {{ edition.subject || "Sin asunto" }}</p>
+          <div class="email-preview">
+            <div class="mini-brand">
+              <img
+                src="images/escudo-argentino.png"
+                alt=""
+                width="30"
+                height="46"
+              />
+              <h3>Museos de Córdoba</h3>
+              <div class="gold-rule"></div>
+            </div>
+            <h1>
+              {{ edition.title || edition.subject || "Tu próxima edición" }}
+            </h1>
+            <p class="intro">{{ edition.intro }}</p>
+            @for (block of edition.blocks; track block.id) {
+              <article class="email-block">
+                @if (block.kind === "news") {
+                  @if (published(block.newsSlug); as n) {
+                    <img
+                      [src]="'images/' + n.image + '.jpg'"
+                      [alt]="n.title"
+                    />
+                    <h2>{{ n.title }}</h2>
+                    <p>{{ n.intro }}</p>
+                    <a [routerLink]="['/noticias', n.slug]" class="text-link"
+                      >Leer nota →</a
+                    >
+                  }
+                } @else {
+                  <span class="eyebrow">SOLO EN ESTA EDICIÓN</span>
+                  @if (block.title) {
+                    <h2>{{ block.title }}</h2>
+                  }
+                  @for (p of paragraphs(block.text); track $index) {
+                    <p>{{ p }}</p>
+                  }
+                }
+              </article>
+            }
+            <p class="demo-label">
+              Vista previa de la demo. No se envía ningún correo.
+            </p>
+          </div>
+        </div>
+      }
+    </section>
+  }
+}
+<div
+  class="admin-feedback"
+  [class.has-feedback]="!!message()"
+  role="status"
+  aria-live="polite"
+>
+  {{ message() }}
+</div>
+@if (store.storageWarning()) {
+  <p role="status" class="demo-label">{{ store.storageWarning() }}</p>
+}
